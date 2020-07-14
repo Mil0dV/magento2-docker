@@ -4,21 +4,22 @@ services:
   sslproxy:
     image: zsoerenm/magento2-sslproxy:2.2.6
     depends_on:
-      - varnish
+      - web
     ports:
       - "443:443"
       - "80:80"
     volumes:
-      - ./certs/localhost+2-key.pem:/etc/nginx/ssl/nginx.key
-      - ./certs/localhost+2.pem:/etc/nginx/ssl/nginx.crt
+      - ./certs/key.pem:/etc/nginx/ssl/nginx.key
+      - ./certs/cert.pem:/etc/nginx/ssl/nginx.crt
     environment:
-      - BACKEND_HOST=varnish
-      - SERVER_NAME=localhost
+      - BACKEND_HOST=web
+      - SERVER_NAME=magento2.test
 
-  varnish:
-    image: zsoerenm/magento2-varnish:2.2.6
-    depends_on:
-      - web
+  # varnish:
+  #   image: zsoerenm/magento2-varnish:2.2.6
+  #   depends_on:
+  #     - web
+      
 
   redis:
     image: redis:alpine
@@ -44,15 +45,18 @@ services:
       - mediadata:/var/www/html/pub/media
       - configdata:/var/www/html/app/etc
       - appdata:/var/www/html
+      - ../co2ok-plugin-magento-2/Milodv:/var/www/html/app/code/Milodv
+      # - ../Custom-Fee-Magento2/Sivajik34:/var/www/html/app/code/Sivajik34
+      # - ../Donation:/var/www/html/app/code/Donation
 #      - ./src/app/code:/var/www/html/app/code
 #      - ./src/vendor/<some_vendor>:/var/www/html/vendor/<some_vendor>
-    environment:
-      - DEFAULT_CACHE_REDIS_SERVER=redis
-      - DEFAULT_CACHE_REDIS_DATABASE=1
-      - PAGE_CACHE_REDIS_SERVER=redis
-      - PAGE_CACHE_REDIS_DATABASE=2
-      - SESSION_REDIS_SERVER=redis
-      - SESSION_REDIS_DATABASE=3
+    # environment:
+      # - DEFAULT_CACHE_REDIS_SERVER=redis
+      # - DEFAULT_CACHE_REDIS_DATABASE=1
+      # - PAGE_CACHE_REDIS_SERVER=redis
+      # - PAGE_CACHE_REDIS_DATABASE=2
+      # - SESSION_REDIS_SERVER=redis
+      # - SESSION_REDIS_DATABASE=3
 
   db:
     image: mariadb:10.2
@@ -66,15 +70,15 @@ services:
       - MYSQL_USER=magento2
       - MYSQL_PASSWORD=magento2
 
-  cron:
-    image: zsoerenm/magento2-php:2.2.6
-    depends_on:
-      - db
-    volumes:
-      - mediadata:/var/www/html/pub/media
-      - configdata:/var/www/html/app/etc
-      - appdata:/var/www/html
-    entrypoint: "su magento -s /bin/sh -c 'trap exit TERM; while :; do bin/magento cron:run; sleep 1m & wait $${!}; done;'"
+  # cron:
+  #   image: zsoerenm/magento2-php:2.2.6
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - mediadata:/var/www/html/pub/media
+  #     - configdata:/var/www/html/app/etc
+  #     - appdata:/var/www/html
+  #   entrypoint: "su magento -s /bin/sh -c 'trap exit TERM; while :; do bin/magento cron:run; sleep 1m & wait $${!}; done;'"
 
 volumes:
   dbdata:
